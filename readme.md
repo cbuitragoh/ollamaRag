@@ -1,0 +1,1 @@
+## Ollama app running with FastAPI
