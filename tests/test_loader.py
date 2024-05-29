@@ -3,9 +3,8 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-from src.helpers import respond_to_message
+from src.helpers import respond_to_message, load_docs
 from src.app import create_logger
-from src.loader_docs import load_docs
 
 class TestHelpers(unittest.TestCase):
     def test_respond_to_message(self):
