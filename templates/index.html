@@ -19,8 +19,14 @@
             <input type="text" id="user-input" placeholder="Type your message here...">
             <button onclick="sendMessage()">Send</button>
         </div>
+        <div class="file-upload">
+            <input type="file" id="file-input" multiple>
+            <button onclick="uploadFiles()">Upload</button>
+        </div>
+        <div id="loader" class="loader" style="display: none;"></div>
     </div>
 
+    <script src="/static/js/upload_files.js"></script>
     <script src="/static/js/handler_message.js"></script>
 </body>
 </html>
