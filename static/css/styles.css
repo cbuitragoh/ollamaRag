@@ -15,11 +15,13 @@ body {
 
 /* Style the left menu */
 .left-menu {
-    width: 200px; /* Adjust width as needed */
-    background-color: #f4f4f4; /* Background color for the menu */
-    border-right: 1px solid #ccc; /* Right border for separation */
+    width:max-content; /* Adjust width as needed */
+    background-color: #1f2127; /* Background color for the menu */
+    border-right: 1px solid #1f2127; /* Right border for separation */
     padding: 10px; /* Padding inside the menu */
     transition: transform 0.3s ease; /* Smooth transition for hiding/showing */
+    justify-content: baseline;
+    color: #ffffff;
 }
 
 .left-menu.hidden {
@@ -46,9 +48,9 @@ body {
 
 .input-container {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-    border: 1px solid #ccc; /* Example styling */
+    border: 1px solid #1f2127; /* Example styling */
     padding: 10px; /* Example styling */
 }
 
