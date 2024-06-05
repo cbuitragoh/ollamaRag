@@ -9,24 +9,34 @@
 </head>
 <body>
     <h1>Analyst Chatbot</h1>
+    <button id="toggle-menu" onclick="toggleMenu()">My Files</button>
     <div class="container">
-        <div class="chat-box" id="chat-box">
-            <div class="message bot-message">
-                <p>{{ bot_response }}</p>
+        <div class="left-menu" id="left-menu">
+            <ul id="file-list">
+                <!-- Uploaded file names will be appended here -->
+            </ul>
+        </div>
+        <div class="main-content">
+            <div class="chat-box" id="chat-box">
+                <div class="message bot-message">
+                    <p>{{ bot_response }}</p>
+                </div>
             </div>
+            <div class="input-container" id="input-container">
+                <input type="text" id="user-input" placeholder="Type your message here...">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+            <div class="file-upload">
+                <input type="file" id="file-input" multiple>
+                <button onclick="uploadFiles()">Upload</button>
+            </div>
+            <div id="loader" class="loader" style="display: none;"></div>
         </div>
-        <div class="input-container">
-            <input type="text" id="user-input" placeholder="Type your message here...">
-            <button onclick="sendMessage()">Send</button>
-        </div>
-        <div class="file-upload">
-            <input type="file" id="file-input" multiple>
-            <button onclick="uploadFiles()">Upload</button>
-        </div>
-        <div id="loader" class="loader" style="display: none;"></div>
     </div>
 
     <script src="/static/js/upload_files.js"></script>
     <script src="/static/js/handler_message.js"></script>
+    <script src="/static/js/toggle_menu.js"></script>
+    
 </body>
 </html>

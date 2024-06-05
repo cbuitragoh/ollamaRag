@@ -1,4 +1,3 @@
-
 // loader files
 function showLoader() {
     document.getElementById('loader').style.display = 'block';
@@ -27,7 +26,10 @@ function uploadFiles() {
     .then(data => {
         hideLoader();
         // Handle the response from the server
+        alert("Files successfully uploaded");
         console.log(data);
+        fileInput.value = ''; // Reset the file input
+        fetchFiles(); // Refresh the file list
     })
     .catch(error => {
         hideLoader();
@@ -35,3 +37,35 @@ function uploadFiles() {
     });
 }
 
+function addFileToMenu(fileName) {
+    var fileList = document.getElementById('file-list');
+    var listItem = document.createElement('li');
+    listItem.textContent = fileName;
+    fileList.appendChild(listItem);
+}
+
+function fetchFiles() {
+    fetch('http://localhost:8000/files') // Update this URL if your FastAPI server is running on a different host/port
+    .then(response => response.json())
+    .then(data => {
+        var fileList = document.getElementById('file-list');
+        fileList.innerHTML = ''; // Clear the current list
+        data.files.forEach(fileName => {
+            addFileToMenu(fileName);
+        });
+    })
+    .catch(error => {
+        console.error('Error fetching files:', error);
+    });
+}
+
+document.getElementById('user-input').addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+        sendMessage();
+    }
+});
+
+// Fetch the files when the page loads
+window.onload = function() {
+    fetchFiles();
+};

@@ -30,3 +30,9 @@ function sendMessage() {
     })
     .catch(error => console.error('Error:', error));
 }
+
+document.getElementById("user-input").addEventListener("keydown", function(event) {
+    if (event.key === 'Enter') {
+        sendMessage();
+    }
+});
