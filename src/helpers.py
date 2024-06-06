@@ -5,7 +5,7 @@ from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
 from langchain_community.document_loaders import UnstructuredPDFLoader
 from langchain_community.document_loaders import OnlinePDFLoader
-from src.prompt_templates import basic_template, veterinarian_template
+from src.prompt_templates import basic_template, formal_template
 
 from .logger import create_logger
 from dotenv import load_dotenv
@@ -39,7 +39,7 @@ def respond_to_message(
         base_template = basic_template
         prompt = PromptTemplate.from_template(template=base_template)
     else:
-        base_template = veterinarian_template
+        base_template = formal_template
         prompt = ChatPromptTemplate.from_messages(base_template)
     output_parser = StrOutputParser()
     chain = prompt | llm | output_parser
