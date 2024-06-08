@@ -24,7 +24,6 @@ def load_docs(path:str):
         loader = UnstructuredPDFLoader(path)
         return loader.load()
     except Exception:
-        logger = create_logger()
         logger.error("Error loading document")
         return None
     
