@@ -7,8 +7,6 @@ from langchain_community.document_loaders import UnstructuredPDFLoader
 from langchain_community.document_loaders import OnlinePDFLoader
 from src.prompt_templates import basic_template, formal_template
 
-from dotenv import load_dotenv
-load_dotenv()
 
 # SETTINGS
 KEY = os.environ["OPENAI_API_KEY"]
@@ -22,46 +20,43 @@ def load_docs(path:str):
             raise ValueError("File must be a PDF o Word document")
         loader = UnstructuredPDFLoader(path)
         return loader.load()
-    except Exception:
+    except Exception as e:
+        print("Excption loading documents for RAG: ", e)
         return None
+    
     
 #function to create pinecone vector dataabase for RAG
 def create_pinecone_index(
         index_name:str,
         pinecone_key:str
 ):
-    try:
-        from pinecone import Pinecone, ServerlessSpec
-        pc = Pinecone(api_key=pinecone_key)
-        if index_name not in pc.list_indexes().names():
-            pc.create_index(
-                name=index_name,
-                dimension=1536, # Replace with your model dimensions
-                metric="cosine", # Replace with your model metric
-                spec=ServerlessSpec(
-                    cloud="aws",
-                    region="us-east-1"
-                ) 
-            )
-    except Exception:
-        return None
+    from pinecone import Pinecone, ServerlessSpec
+    pc = Pinecone(api_key=pinecone_key)
+    if index_name not in pc.list_indexes().names():
+        pc.create_index(
+            name=index_name,
+            dimension=1536, # Replace with your model dimensions
+            metric="cosine", # Replace with your model metric
+            spec=ServerlessSpec(
+                cloud="aws",
+                region="us-east-1"
+            ) 
+        )
+
 
 #create embeddings from nomic-embed-text model
 def create_embeddings(docs):
-    try:
-        from langchain_community.embeddings import OllamaEmbeddings
-        from langchain_text_splitters import RecursiveCharacterTextSplitter
-        # Split and chunk 
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=7500, chunk_overlap=100)
-        chunks = text_splitter.split_documents(docs)
-        ollama_emb = OllamaEmbeddings(
-            model="nomic-embed-text"
-        )
-        embeddings = ollama_emb.embed_documents(chunks)
-        return embeddings
-    
-    except Exception:
-        return None
+    from langchain_community.embeddings import OllamaEmbeddings
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
+    # Split and chunk 
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=7500, chunk_overlap=100)
+    chunks = text_splitter.split_documents(docs)
+    ollama_emb = OllamaEmbeddings(
+        model="nomic-embed-text"
+    )
+    embeddings = ollama_emb.embed_documents(chunks)
+    return embeddings
+
 
 #add embeddings to pinecone vector database
 def add_embeddings_to_pinecone(
@@ -69,16 +64,14 @@ def add_embeddings_to_pinecone(
         index_name:str,
         namespace:str
 ):
-    try:
-        from langchain_pinecone import PineconeVectorStore
-        vectorstore = PineconeVectorStore(
-            index_name=index_name,
-            namespace=namespace,
-            embedding=embeddings
-        )
-        return vectorstore
-    except Exception:
-        return None    
+    from langchain_pinecone import PineconeVectorStore
+    vectorstore = PineconeVectorStore(
+        index_name=index_name,
+        namespace=namespace,
+        embedding=embeddings
+    )
+    return vectorstore
+
 
 #query the vector database
 def query_vector_db(

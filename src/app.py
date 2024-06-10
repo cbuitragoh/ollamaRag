@@ -54,21 +54,25 @@ async def upload_files(files: list[UploadFile] = File(...)):
             with open(file_location, "wb") as f:
                 f.write(file.file.read())
 
-            # Load the document --TODO
+                # Load the document
                 documents = load_docs(file_location)
                 if documents is None:
                     logger.error("Error loading document")
                     raise HTTPException(status_code=400, detail="Error loading document")
             
             # create pinecone index
-            try: 
+            try:
+                print("creating index...") 
                 index_name = os.getenv("PINECONE_INDEX_NAME")
+                print("index_name: ", index_name)
                 pinecone_key = os.getenv("PINECONE_API_KEY")
                 create_pinecone_index(index_name, pinecone_key)
                 try:
                     # create embeddings and add to pinecone
                     namespace = os.getenv("PINECONE_NAMESPACE")
+                    print("creating embeddings...")
                     embeddings = create_embeddings(documents)
+                    print("adding embeddings to pinecone...")
                     add_embeddings_to_pinecone(index_name, embeddings, namespace)
                 except Exception as e:
                     logger.error(f"Error adding embeddings to Pinecone index: {str(e)}")
@@ -77,7 +81,6 @@ async def upload_files(files: list[UploadFile] = File(...)):
             except Exception as e:
                 logger.error(f"Error creating Pinecone index: {str(e)}")
                 raise HTTPException(status_code=500, detail="Error creating Pinecone index")
-
 
 
         return {"filename": file.filename, "content": documents}
