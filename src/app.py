@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+import os
 from fastapi import FastAPI, Request, File, UploadFile, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -5,7 +8,6 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from src.logger import create_logger
-import os
 from src.helpers import (
     respond_to_message,
     load_docs,
@@ -13,9 +15,6 @@ from src.helpers import (
     create_embeddings,
     add_embeddings_to_pinecone
 )
-
-from dotenv import load_dotenv
-load_dotenv()
 
 app = FastAPI()
 
@@ -64,23 +63,23 @@ async def upload_files(files: list[UploadFile] = File(...)):
             try:
                 print("creating index...") 
                 index_name = os.getenv("PINECONE_INDEX_NAME")
-                print("index_name: ", index_name)
                 pinecone_key = os.getenv("PINECONE_API_KEY")
-                create_pinecone_index(index_name, pinecone_key)
-                try:
-                    # create embeddings and add to pinecone
-                    namespace = os.getenv("PINECONE_NAMESPACE")
-                    print("creating embeddings...")
-                    embeddings = create_embeddings(documents)
-                    print("adding embeddings to pinecone...")
-                    add_embeddings_to_pinecone(index_name, embeddings, namespace)
-                except Exception as e:
-                    logger.error(f"Error adding embeddings to Pinecone index: {str(e)}")
-                    raise HTTPException(status_code=500, detail="Error adding embeddings to Pinecone index")
-
+                index = create_pinecone_index(index_name, pinecone_key)
             except Exception as e:
                 logger.error(f"Error creating Pinecone index: {str(e)}")
                 raise HTTPException(status_code=500, detail="Error creating Pinecone index")
+            try:
+                # create embeddings and add to pinecone
+                namespace = os.getenv("PINECONE_NAMESPACE")
+                print("creating embeddings...")
+                embeddings = create_embeddings(documents)
+                print("adding embeddings to pinecone...")
+                add_embeddings_to_pinecone(index, embeddings, namespace)
+            except Exception as e:
+                logger.error(f"Error adding embeddings to Pinecone index: {str(e)}")
+                raise HTTPException(status_code=500, detail="Error adding embeddings to Pinecone index")
+
+            
 
 
         return {"filename": file.filename, "content": documents}

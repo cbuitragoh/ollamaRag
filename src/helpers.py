@@ -21,7 +21,7 @@ def load_docs(path:str):
         loader = UnstructuredPDFLoader(path)
         return loader.load()
     except Exception as e:
-        print("Excption loading documents for RAG: ", e)
+        print("Exception loading documents for RAG: ", e)
         return None
     
     
@@ -35,13 +35,17 @@ def create_pinecone_index(
     if index_name not in pc.list_indexes().names():
         pc.create_index(
             name=index_name,
-            dimension=1536, # Replace with your model dimensions
+            dimension=768, # Replace with your model dimensions
             metric="cosine", # Replace with your model metric
             spec=ServerlessSpec(
                 cloud="aws",
                 region="us-east-1"
             ) 
         )
+
+    index = pc.Index(index_name)
+    
+    return index
 
 
 #create embeddings from nomic-embed-text model
@@ -59,18 +63,36 @@ def create_embeddings(docs):
 
 
 #add embeddings to pinecone vector database
-def add_embeddings_to_pinecone(
-        embeddings,
+def create_vectorstore_and_add_embeddings(
+        docs,
         index_name:str,
         namespace:str
 ):
     from langchain_pinecone import PineconeVectorStore
+    from langchain_community.embeddings import OllamaEmbeddings
     vectorstore = PineconeVectorStore(
-        index_name=index_name,
+        index=index_name,
         namespace=namespace,
-        embedding=embeddings
+        embedding=OllamaEmbeddings(model="nomic-embed-text"))
+    vectorstore.add_texts(
+        texts= [
+            doc.page_content for doc in docs
+        ]
     )
     return vectorstore
+
+
+#add embeddings to pinecone vector database
+def add_embeddings_to_pinecone(
+        index,
+        embeddings,
+        namespace:str
+):
+    for i, embedding in enumerate(iterable=embeddings, start=1):
+        index.upsert(
+            vectors=[{"id":str(i), "values": embedding}],
+            namespace=namespace
+        )
 
 
 #query the vector database
