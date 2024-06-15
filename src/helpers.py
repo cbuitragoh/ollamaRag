@@ -3,8 +3,6 @@ import os
 from langchain_core.prompts import PromptTemplate, ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
-from langchain_community.document_loaders import UnstructuredPDFLoader
-from langchain_community.document_loaders import OnlinePDFLoader
 from src.prompt_templates import basic_template, formal_template
 
 
@@ -13,6 +11,8 @@ KEY = os.environ["OPENAI_API_KEY"]
 
 # function to load the documents for RAG
 def load_docs(path:str):
+    from langchain_community.document_loaders import UnstructuredPDFLoader
+
     try:
         if not os.path.exists(path):
             raise FileNotFoundError
@@ -30,6 +30,7 @@ def create_pinecone_index(
         index_name:str,
         pinecone_key:str
 ):
+    import time
     from pinecone import Pinecone, ServerlessSpec
     pc = Pinecone(api_key=pinecone_key)
     if index_name not in pc.list_indexes().names():
@@ -42,6 +43,8 @@ def create_pinecone_index(
                 region="us-east-1"
             ) 
         )
+        while not pc.describe_index(index_name).status["ready"]:
+            time.sleep(1)
 
     index = pc.Index(index_name)
     
@@ -70,14 +73,15 @@ def create_vectorstore_and_add_embeddings(
 ):
     from langchain_pinecone import PineconeVectorStore
     from langchain_community.embeddings import OllamaEmbeddings
-    vectorstore = PineconeVectorStore(
-        index=index_name,
-        namespace=namespace,
-        embedding=OllamaEmbeddings(model="nomic-embed-text"))
-    vectorstore.add_texts(
-        texts= [
-            doc.page_content for doc in docs
-        ]
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
+    # Split and chunk 
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=7500, chunk_overlap=100)
+    chunks = text_splitter.split_documents(docs)
+    vectorstore = PineconeVectorStore.from_documents(
+        documents=chunks,
+        embedding=OllamaEmbeddings(model="nomic-embed-text"),
+        index_name=index_name,
+        namespace=namespace,   
     )
     return vectorstore
 

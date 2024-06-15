@@ -13,7 +13,8 @@ from src.helpers import (
     load_docs,
     create_pinecone_index,
     create_embeddings,
-    add_embeddings_to_pinecone
+    add_embeddings_to_pinecone,
+    create_vectorstore_and_add_embeddings
 )
 
 app = FastAPI()
@@ -71,10 +72,19 @@ async def upload_files(files: list[UploadFile] = File(...)):
             try:
                 # create embeddings and add to pinecone
                 namespace = os.getenv("PINECONE_NAMESPACE")
-                print("creating embeddings...")
-                embeddings = create_embeddings(documents)
-                print("adding embeddings to pinecone...")
-                add_embeddings_to_pinecone(index, embeddings, namespace)
+                #print("creating embeddings...")
+                #embeddings = create_embeddings(documents)
+                #print("adding embeddings to pinecone...")
+                #add_embeddings_to_pinecone(index, embeddings, namespace)
+                print("adding embeddings to vectorstore with langchain...")
+                vectorstore = create_vectorstore_and_add_embeddings(
+                    docs=documents,
+                    index_name=index_name,
+                    namespace=namespace)
+                query = "¿De cuánto es el ingreso anual de más de 25 millones de familias?"
+                results = vectorstore.similarity_search(query, k=2)
+                print(results[0].page_content)
+
             except Exception as e:
                 logger.error(f"Error adding embeddings to Pinecone index: {str(e)}")
                 raise HTTPException(status_code=500, detail="Error adding embeddings to Pinecone index")
