@@ -59,12 +59,6 @@ function fetchFiles() {
     });
 }
 
-document.getElementById('user-input').addEventListener('keydown', function(event) {
-    if (event.key === 'Enter') {
-        sendMessage();
-    }
-});
-
 // Fetch the files when the page loads
 window.onload = function() {
     fetchFiles();

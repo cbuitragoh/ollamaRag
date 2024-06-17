@@ -33,6 +33,7 @@ function sendMessage() {
 
 document.getElementById("user-input").addEventListener("keydown", function(event) {
     if (event.key === 'Enter') {
+        event.preventDefault(); // Prevent default form submission
         sendMessage();
     }
 });
