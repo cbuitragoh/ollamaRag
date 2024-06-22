@@ -83,8 +83,6 @@ async def upload_files(files: list[UploadFile] = File(...)):
                 raise HTTPException(status_code=500, detail="Error adding embeddings to Pinecone index")
 
             
-
-
         return {"filename": file.filename, "content": documents}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
@@ -100,7 +98,7 @@ async def list_files():
 async def send_message(message: Message):
     # Process the incoming message
     user_message = message.message
-    bot_response = respond_to_message(user_message, "formal")
+    bot_response = respond_to_message(user_message, "formal", model_name="mistral")
     return JSONResponse(content={"message": bot_response})
 
 

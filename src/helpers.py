@@ -1,7 +1,6 @@
 # import libraries
 import os
-from langchain_core.prompts import PromptTemplate, ChatPromptTemplate, MessagesPlaceholder
-from langchain_openai import ChatOpenAI
+from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_pinecone import PineconeVectorStore
 from src.prompt_templates import basic_template, formal_template
@@ -160,20 +159,33 @@ def query_vector_db(
         return None
     
 
+# TODO
+# create template for query to chatbot 
+
+
 # Chat response
 def respond_to_message(
         user_input: str = "hello",
-        template_name: str = "basic"
+        template_name: str = "basic",
+        model_name: str = "gpt-3.5-turbo"
 ):
     """
     args:
         user_input: the user's input message
         template_name: the name of the template to use
+        model: the model to use for the response
 
     returns:
         response: the bot's response
     """
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo", openai_api_key=KEY)
+    from langchain_openai import ChatOpenAI
+    from langchain_community.chat_models import ChatOllama
+    if model_name == "gpt-3.5-turbo":
+        llm = ChatOpenAI(model_name="gpt-3.5-turbo", openai_api_key=KEY)
+    elif model_name == "mistral":
+        llm = ChatOllama(model="mistral")
+    else:
+        llm = ChatOpenAI(model_name=model_name, openai_api_key=KEY)
     if template_name == "basic":
         base_template = basic_template
         prompt = PromptTemplate.from_template(template=base_template)
