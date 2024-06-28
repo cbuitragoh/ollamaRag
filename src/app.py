@@ -71,12 +71,14 @@ async def upload_files(files: list[UploadFile] = File(...)):
             try:
                 # create embeddings and add to pinecone
                 namespace = os.getenv("PINECONE_NAMESPACE")
-                print("adding embeddings to vectorstore with langchain...")
+                print("adding embeddings to vectorstore with langchain...") 
+                global vectorstore
                 vectorstore = create_vectorstore_and_add_embeddings(
                     docs=documents,
                     index_name=index_name,
                     namespace=namespace
                 )
+
 
             except Exception as e:
                 logger.error(f"Error adding embeddings to Pinecone index: {str(e)}")
@@ -98,7 +100,9 @@ async def list_files():
 async def send_message(message: Message):
     # Process the incoming message
     user_message = message.message
-    bot_response = respond_to_message(user_message, "formal", model_name="mistral")
+    RAG_result = query_vector_db(vectorstore, user_message)
+    query_to_llm = f"Context: {RAG_result}\n\nQuestion: {user_message}"
+    bot_response = respond_to_message(query_to_llm, "formal", model_name="mistral")
     return JSONResponse(content={"message": bot_response})
 
 
