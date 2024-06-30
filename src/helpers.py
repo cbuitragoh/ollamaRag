@@ -153,7 +153,6 @@ def query_vector_db(
     """
     try:
         results = vectorstore.similarity_search(query, k=2)
-        print(results[0].page_content)
         return results
     except Exception:
         return None
